@@ -543,9 +543,13 @@
       let controls = "";
       if(!r || r.phase==="resolved"){
         const anyBet = !r && others.some(p=>(p.pendingBet||0) >= 10);
+        const readyCount = others.filter(p=>(p.pendingBet||0)>=10 && p.ready).length;
+        const readyNote = !r && others.length
+          ? `<p class="hint" style="margin:0 0 4px;">${readyCount}/${others.length} ready &mdash; deals itself once everyone's in, or hit Deal to start with whoever's bet.</p>`
+          : '';
         controls = r
           ? `<button class="btn" onclick="dealerNextRound()">Next round</button>`
-          : `<button class="btn" onclick="dealerDeal()" ${anyBet?'':'disabled'}>Deal</button>`;
+          : `${readyNote}<button class="btn" onclick="dealerDeal()" ${anyBet?'':'disabled'}>Deal</button>`;
       } else {
         controls = `<p class="hint" style="margin:0;">Round in progress &mdash; ${r.order[r.turnIdx] ? escapeHtml((state.players.find(p=>p.id===r.order[r.turnIdx])||{}).name||'') + "'s move" : 'dealer is playing'}</p>`;
       }
@@ -580,16 +584,19 @@
         ? `<button class="btn ghost" onclick="toggleReady()">Not ready after all</button>`
         : `<button class="btn" onclick="toggleReady()" ${canReady?'':'disabled'}>Ready</button>`;
       const others = state.players.filter(p=>!p.isDealer && p.id!==me.id);
-      const waitingOn = others.filter(p=>(p.pendingBet||0)>=10 && !p.ready).map(p=>p.name);
+      // the whole table has to be in -- everyone seated needs a bet down and Ready hit
+      const notIn = others.filter(p=>(p.pendingBet||0)<10 || !p.ready).map(p=>p.name);
       let statusLine;
-      if(me.ready && waitingOn.length){
-        statusLine = `Waiting on ${escapeHtml(waitingOn.join(', '))}&hellip;`;
+      if(!canReady){
+        statusLine = noDealer
+          ? "Place a bet, then hit Ready. The round deals once everyone at the table is in."
+          : "Place a bet, then hit Ready.";
+      } else if(me.ready && notIn.length){
+        statusLine = `Waiting on ${escapeHtml(notIn.join(', '))}&hellip;`;
       } else if(me.ready){
         statusLine = "Everyone's ready &mdash; dealing now.";
-      } else if(noDealer){
-        statusLine = "No one's dealing here &mdash; the house deals itself once everyone with a bet down hits Ready.";
       } else {
-        statusLine = "Place a bet, then hit Ready.";
+        statusLine = "Hit Ready when your bet's locked in.";
       }
       panel.innerHTML = `
         <h3>Your bet</h3>

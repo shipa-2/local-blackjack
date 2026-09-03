@@ -140,15 +140,16 @@ def public_state(viewer_id, is_localhost=False):
     }
 
 def bettors_awaiting():
-    """Players who've put money down for this round but haven't hit Ready yet."""
+    """Every seated player who hasn't both bet and hit Ready yet -- the
+    whole table has to be in, not just whoever's fastest."""
     return [
         pid for pid in betting_player_ids()
-        if STATE["pending_bets"].get(pid, 0) >= MIN_BET and not STATE["ready"].get(pid, False)
+        if STATE["pending_bets"].get(pid, 0) < MIN_BET or not STATE["ready"].get(pid, False)
     ]
 
 def maybe_auto_deal():
-    active = [pid for pid in betting_player_ids() if STATE["pending_bets"].get(pid, 0) >= MIN_BET]
-    if active and not bettors_awaiting():
+    seated = betting_player_ids()
+    if seated and not bettors_awaiting():
         start_round()
 
 def start_round():
