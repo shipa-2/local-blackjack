@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Felt &amp; Brass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root{
+    --felt-900:#0a2f24;
+    --felt-850:#0d3a2c;
+    --felt-800:#123f30;
+    --felt-700:#1a5642;
+    --felt-line:rgba(212,175,90,.22);
+    --brass:#cda434;
+    --brass-bright:#eecd77;
+    --brass-dim:#8a6d24;
+    --cream:#f3ead6;
+    --cream-dim:#d9cdae;
+    --ink:#1c1712;
+    --suit-red:#c1443b;
+    --suit-black:#1b1a17;
+    --success:#5fa876;
+    --danger:#c1443b;
+    --push:#c9a75a;
+    --shadow:rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse 120% 80% at 50% -10%, var(--felt-700) 0%, var(--felt-850) 55%, var(--felt-900) 100%);
+    color:var(--cream);
+    font-family:"Fraunces","Iowan Old Style",Georgia,serif;
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--brass); color:var(--ink);}
+  .wrap{width:100%; max-width:1040px; padding:20px 16px 40px; display:flex; flex-direction:column; min-height:100vh;}
+  .marquee{text-align:center; padding:6px 0 10px;}
+  .marquee h1{
+    font-family:"Bebas Neue",Impact,sans-serif;
+    font-size:clamp(2.1rem,6.5vw,3.2rem);
+    letter-spacing:.14em; margin:0; color:var(--brass-bright);
+    text-shadow:0 2px 0 rgba(0,0,0,.5), 0 0 26px rgba(238,205,119,.18);
+    text-wrap:balance;
+  }
+  .marquee .sub{
+    font-family:"Space Mono",monospace; font-size:.7rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--cream-dim); margin-top:2px;
+  }
+  .rule{height:1px; width:100%; background:linear-gradient(90deg,transparent, var(--felt-line) 15%, var(--felt-line) 85%, transparent); margin:8px 0 18px;}
+
+  .panel{
+    background:linear-gradient(180deg, var(--felt-800), var(--felt-850));
+    border:1px solid var(--felt-line);
+    border-radius:14px;
+    box-shadow:0 18px 40px var(--shadow), inset 0 1px 0 rgba(255,255,255,.03);
+    padding:26px clamp(16px,4vw,34px);
+  }
+  .panel h2{
+    font-family:"Bebas Neue",sans-serif; letter-spacing:.08em; font-size:1.4rem;
+    color:var(--brass-bright); margin:0 0 4px;
+  }
+  .panel p.hint{font-size:.9rem; color:var(--cream-dim); margin:0 0 18px; max-width:60ch; line-height:1.5;}
+
+  .field-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  input[type=text]{
+    flex:1; min-width:180px;
+    background:var(--felt-900); border:1px solid var(--felt-line); border-radius:8px;
+    color:var(--cream); font-family:"Fraunces",serif; font-size:1rem; padding:11px 14px;
+  }
+  input[type=text]:focus{outline:2px solid var(--brass); outline-offset:1px;}
+  input::placeholder{color:var(--cream-dim); opacity:.6;}
+
+  .btn{
+    font-family:"Fraunces",serif; font-weight:600; font-size:.92rem; letter-spacing:.02em;
+    border:1px solid var(--brass-dim);
+    background:linear-gradient(180deg, var(--brass), var(--brass-dim));
+    color:var(--ink); border-radius:8px; padding:10px 18px; cursor:pointer;
+    transition:transform .1s ease, filter .15s ease;
+    box-shadow:0 3px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.25);
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.35);}
+  .btn:focus-visible{outline:2px solid var(--cream); outline-offset:2px;}
+  .btn.ghost{background:transparent; color:var(--brass-bright); border:1px solid var(--felt-line); box-shadow:none;}
+  .btn.ghost:hover{border-color:var(--brass);}
+  .btn:disabled{opacity:.35; cursor:not-allowed; filter:none; transform:none; box-shadow:none;}
+
+  .hidden{display:none !important;}
+
+  /* ---- join screen ---- */
+  .dealer-status{
+    font-family:"Space Mono",monospace; font-size:.8rem; color:var(--cream-dim);
+    background:var(--felt-900); border:1px solid var(--felt-line); border-radius:8px;
+    padding:10px 14px; margin-bottom:16px;
+  }
+  .dealer-status b{color:var(--brass-bright);}
+
+  /* ---- shared table header ---- */
+  .table-head{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    margin-bottom:16px;
+  }
+  .whoami{
+    font-family:"Space Mono",monospace; font-size:.75rem; color:var(--cream-dim);
+    background:var(--felt-900); border:1px solid var(--felt-line); border-radius:20px;
+    padding:6px 14px;
+  }
+  .whoami b{color:var(--brass-bright);}
+
+  .dealer-zone{text-align:center; padding:6px 0 20px;}
+  .dealer-label{font-family:"Bebas Neue",sans-serif; letter-spacing:.16em; font-size:.82rem; color:var(--brass); margin-bottom:8px;}
+  .hand{display:flex; justify-content:center; min-height:96px;}
+  .hand-value{font-family:"Space Mono",monospace; font-size:.8rem; color:var(--cream-dim); margin-top:8px; font-variant-numeric:tabular-nums;}
+  .hand-value .num{color:var(--brass-bright); font-weight:700;}
+
+  .card{
+    width:58px; height:82px; border-radius:7px; background:var(--cream);
+    border:1px solid rgba(0,0,0,.15); box-shadow:0 3px 8px rgba(0,0,0,.4);
+    margin-left:-28px; position:relative; display:flex; flex-direction:column;
+    justify-content:space-between; padding:5px 6px;
+    font-family:"Space Mono",monospace; font-weight:700; flex:none;
+  }
+  .card:first-child{margin-left:0;}
+  .card.red{color:var(--suit-red);}
+  .card.black{color:var(--suit-black);}
+  .card .corner{font-size:.78rem; line-height:1;}
+  .card .corner.br{align-self:flex-end; transform:rotate(180deg);}
+  .card .center-rank{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.6rem; opacity:.22;}
+  .card.back{background:repeating-linear-gradient(45deg, var(--felt-700) 0 6px, var(--felt-800) 6px 12px); border:2px solid var(--brass-dim); align-items:center; justify-content:center;}
+  .card.back .face{color:var(--brass); font-size:.95rem; letter-spacing:.06em;}
+
+  .card.deal-in{animation:dealIn .38s cubic-bezier(.2,.85,.3,1.15) both;}
+  @keyframes dealIn{
+    from{opacity:0; transform:translate(-46px,-26px) rotate(-16deg) scale(.9);}
+    to{opacity:1; transform:translate(0,0) rotate(0) scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card.deal-in{animation:none;}
+  }
+
+  .round-note{text-align:center; font-family:"Space Mono",monospace; font-size:.76rem; color:var(--cream-dim); margin:0 0 14px; min-height:1.2em;}
+
+  /* ---- roster: everyone's status, visible to all ---- */
+  .roster{display:flex; gap:12px; overflow-x:auto; padding:4px 2px 12px; scroll-snap-type:x proximity;}
+  .seat{
+    scroll-snap-align:center; flex:1 0 210px; min-width:210px;
+    background:var(--felt-800); border:1px solid var(--felt-line); border-radius:12px;
+    padding:14px 15px 15px; position:relative;
+  }
+  .seat.active{border-color:var(--brass); box-shadow:0 0 0 1px var(--brass), 0 10px 26px rgba(0,0,0,.4), 0 0 22px rgba(205,164,52,.18);}
+  .seat.is-dealer{border-color:var(--brass-dim); background:linear-gradient(180deg, var(--felt-800), var(--felt-900));}
+  .seat.out{opacity:.42;}
+  .seat-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; gap:8px;}
+  .seat-head .nm{font-size:1rem;}
+  .status-pill{
+    font-family:"Space Mono",monospace; font-size:.6rem; letter-spacing:.07em; text-transform:uppercase;
+    padding:2px 8px; border-radius:20px; border:1px solid currentColor; white-space:nowrap;
+  }
+  .status-pill.playing{color:var(--brass-bright);}
+  .status-pill.stood{color:var(--cream-dim);}
+  .status-pill.bust{color:var(--danger);}
+  .status-pill.blackjack{color:var(--success);}
+  .status-pill.win{color:var(--success);}
+  .status-pill.lose{color:var(--danger);}
+  .status-pill.push{color:var(--push);}
+  .status-pill.betting{color:var(--cream-dim);}
+  .status-pill.ready{color:var(--success);}
+  .status-pill.dealing{color:var(--brass);}
+
+  .chip-stack{display:inline-flex; align-items:center; margin-left:2px;}
+  .mini-chip{
+    width:15px; height:15px; border-radius:50%; flex:none;
+    border:1.5px dashed var(--cream); box-shadow:0 1px 2px rgba(0,0,0,.45);
+    margin-left:-7px;
+  }
+  .mini-chip:first-child{margin-left:0;}
+  .mini-chip.c5{background:var(--cream);}
+  .mini-chip.c25{background:#7fb890; border-color:#eef7f0;}
+  .mini-chip.c100{background:#5c7fc4; border-color:#e7edfb;}
+  .mini-chip.c500{background:#c1443b; border-color:#f7e4e2;}
+  .chip-count{font-family:"Space Mono",monospace; font-size:.64rem; color:var(--cream-dim); margin-left:5px; font-variant-numeric:tabular-nums;}
+
+  .seat .hand{justify-content:flex-start; min-height:74px;}
+  .seat .card{width:44px; height:64px; padding:4px 5px;}
+  .seat .card .corner{font-size:.66rem;}
+  .seat .card .center-rank{font-size:1.2rem;}
+
+  .seat-foot{
+    display:flex; justify-content:space-between; align-items:center; margin-top:6px;
+    font-family:"Space Mono",monospace; font-size:.72rem; color:var(--cream-dim);
+    font-variant-numeric:tabular-nums;
+  }
+  .seat-foot .bet{color:var(--brass-bright);}
+
+  /* ---- my controls ---- */
+  .my-panel{margin-top:4px;}
+  .my-panel h3{
+    font-family:"Bebas Neue",sans-serif; letter-spacing:.1em; font-size:1.05rem; color:var(--brass-bright);
+    margin:0 0 10px;
+  }
+  .chip-btns{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .chip{
+    width:44px; height:44px; border-radius:50%; border:2px dashed var(--cream);
+    display:flex; align-items:center; justify-content:center; font-family:"Space Mono",monospace;
+    font-size:.72rem; font-weight:700; cursor:pointer; color:var(--ink); flex:none;
+  }
+  .chip:hover{transform:translateY(-2px);}
+  .chip.c5{background:var(--cream);}
+  .chip.c25{background:#7fb890; border-color:#eef7f0;}
+  .chip.c100{background:#5c7fc4; border-color:#e7edfb; color:var(--cream);}
+  .chip.c500{background:#c1443b; border-color:#f7e4e2; color:var(--cream);}
+  .bet-line{
+    font-family:"Space Mono",monospace; font-size:.9rem; color:var(--brass-bright);
+    margin-bottom:12px; display:flex; align-items:center; gap:10px;
+  }
+  .bet-line button{background:none; border:none; color:var(--cream-dim); text-decoration:underline; cursor:pointer; font-family:"Fraunces",serif; font-size:.8rem;}
+  .action-row{display:flex; gap:10px; flex-wrap:wrap;}
+
+  .dealer-console{display:flex; flex-direction:column; gap:10px;}
+  .dc-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    background:var(--felt-900); border:1px solid var(--felt-line); border-radius:10px; padding:10px 14px;
+  }
+  .dc-row .who{font-size:.95rem;}
+  .dc-row .bank{font-family:"Space Mono",monospace; font-size:.8rem; color:var(--brass-bright); font-variant-numeric:tabular-nums;}
+  .adj-btn{
+    font-family:"Space Mono",monospace; font-weight:700; font-size:.72rem; border-radius:6px;
+    padding:5px 9px; cursor:pointer; font-variant-numeric:tabular-nums;
+  }
+  .adj-btn.plus{background:rgba(95,168,118,.15); border:1px solid var(--success); color:var(--success);}
+  .adj-btn.plus:hover{background:var(--success); color:var(--felt-900);}
+  .adj-btn.minus{background:rgba(193,68,59,.12); border:1px solid var(--danger); color:var(--danger);}
+  .adj-btn.minus:hover{background:var(--danger); color:var(--cream);}
+  .adj-btn.kick{background:transparent; border:1px solid var(--felt-line); color:var(--cream-dim); margin-left:4px;}
+  .adj-btn.kick:hover{border-color:var(--danger); color:var(--danger);}
+  .adj-group{display:flex; gap:5px; flex-wrap:wrap;}
+
+  footer.credit{
+    text-align:center; font-size:.7rem; color:var(--cream-dim); opacity:.55;
+    padding:20px 0 0; font-family:"Space Mono",monospace; letter-spacing:.04em; margin-top:auto;
+  }
+
+  @media (max-width:520px){
+    .field-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="marquee">
+    <h1>Felt &amp; Brass</h1>
+    <div class="sub">Networked blackjack &middot; one host, any number of tables around it</div>
+  </div>
+  <div class="rule"></div>
+
+  <!-- JOIN -->
+  <div id="screen-join" class="panel">
+    <h2>Take a seat</h2>
+    <p class="hint">Everyone on this network opens this same page. Pick a name, then either play a hand or run the table as dealer.</p>
+    <div id="dealerStatus" class="dealer-status"></div>
+    <div class="field-row">
+      <input type="text" id="nameInput" placeholder="Your name" maxlength="18">
+    </div>
+    <div class="field-row">
+      <button class="btn" onclick="joinAs('player')">Join as player</button>
+      <button class="btn ghost" id="dealerBtn" onclick="joinAs('dealer')">Run the table (dealer)</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div id="screen-table" class="hidden">
+    <div class="table-head">
+      <div class="whoami" id="whoami"></div>
+      <button class="btn ghost" onclick="leaveTable()">Leave / switch seat</button>
+    </div>
+
+    <div class="panel">
+      <div class="dealer-zone">
+        <div class="dealer-label" id="dealerLabel">Dealer</div>
+        <div class="hand" id="dealerHand"></div>
+        <div class="hand-value" id="dealerValue">&nbsp;</div>
+      </div>
+
+      <div class="round-note" id="roundNote"></div>
+
+      <div class="roster" id="roster"></div>
+
+      <div class="my-panel" id="myPanel"></div>
+    </div>
+  </div>
+
+  <footer class="credit">SIX-DECK SHOE &middot; BLACKJACK PAYS 3:2 &middot; DEALER STANDS ON 17</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  let myId = localStorage.getItem("fb_id");
+  let myName = localStorage.getItem("fb_name") || "";
+  let lastState = null;
+  let polling = null;
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  }
+
+  async function api(path, body){
+    const res = await fetch(path, {
+      method: body===undefined ? "GET" : "POST",
+      headers: body===undefined ? undefined : {"Content-Type":"application/json"},
+      body: body===undefined ? undefined : JSON.stringify(body)
+    });
+    return res.json();
+  }
+
+  function show(id){
+    document.getElementById("screen-join").classList.toggle("hidden", id!=="join");
+    document.getElementById("screen-table").classList.toggle("hidden", id!=="table");
+  }
+
+  async function refreshJoinScreen(){
+    const state = await api("/api/state" + (myId ? ("?id="+encodeURIComponent(myId)) : ""));
+    const box = document.getElementById("dealerStatus");
+    const dealerBtn = document.getElementById("dealerBtn");
+    dealerBtn.classList.toggle("hidden", !state.canBeDealer);
+    if(state.dealerId){
+      const dealer = state.players.find(p=>p.id===state.dealerId);
+      box.innerHTML = `<b>${dealer?escapeHtml(dealer.name):"Someone"}</b> is already running this table.`;
+      dealerBtn.disabled = true;
+      dealerBtn.title = "A dealer is already seated";
+    } else if(state.canBeDealer){
+      box.innerHTML = "No dealer yet &mdash; deal from this host machine to run the house, or skip it and join as a player: the house deals itself once everyone's ready.";
+      dealerBtn.disabled = false;
+    } else {
+      box.innerHTML = "No one's dealing &mdash; the house deals itself once everyone at the table is ready.";
+    }
+  }
+
+  async function joinAs(role){
+    const input = document.getElementById("nameInput");
+    const name = input.value.trim() || myName || "Player";
+    myName = name;
+    localStorage.setItem("fb_name", name);
+    const state = await api("/api/join", {id: myId, name});
+    myId = state.you;
+    localStorage.setItem("fb_id", myId);
+    if(role === "dealer"){
+      const s2 = await api("/api/claim_dealer", {id: myId});
+      if(s2.dealerId !== myId){
+        alert(s2.error === "only the host machine can deal"
+          ? "Only the host machine can deal - joining as a player instead."
+          : "Someone just claimed the dealer seat first - you're joining as a player instead.");
+      }
+    }
+    enterTable();
+  }
+
+  function enterTable(){
+    show("table");
+    startPolling();
+  }
+
+  async function leaveTable(){
+    stopPolling();
+    if(myId){
+      try{ await api("/api/leave", {id: myId}); }catch(e){ /* host unreachable, drop it locally anyway */ }
+    }
+    localStorage.removeItem("fb_id");
+    myId = null;
+    show("join");
+    refreshJoinScreen();
+  }
+  window.leaveTable = leaveTable;
+  window.joinAs = joinAs;
+
+  function startPolling(){
+    poll();
+    polling = setInterval(poll, 900);
+  }
+  function stopPolling(){
+    if(polling) clearInterval(polling);
+    polling = null;
+  }
+
+  async function poll(){
+    if(!myId) return;
+    try{
+      const state = await api("/api/state?id="+encodeURIComponent(myId));
+      if(!state.players.find(p=>p.id===myId)){
+        // server restarted / we were dropped
+        stopPolling();
+        localStorage.removeItem("fb_id");
+        myId = null;
+        show("join");
+        refreshJoinScreen();
+        return;
+      }
+      lastState = state;
+      render(state);
+    }catch(e){ /* network hiccup, try again next tick */ }
+  }
+
+  function cardHtml(c, isNew, delayMs){
+    const anim = isNew ? ` deal-in" style="animation-delay:${delayMs}ms` : '';
+    if(!c){
+      return `<div class="card back${anim}"><span class="face">F&amp;B</span></div>`;
+    }
+    return `<div class="card ${c.color}${anim}">
+      <span class="corner">${c.rank}</span>
+      <span class="center-rank">${c.rank}</span>
+      <span class="corner br">${c.rank}</span>
+    </div>`;
+  }
+  // tracks how many cards each hand ("dealer" or a player id) had on screen last
+  // render, so a fresh poll only animates the card(s) that actually just landed
+  let prevRoundId = null;
+  let prevCounts = {};
+  function handHtml(cards, key){
+    const prevLen = prevCounts[key] || 0;
+    prevCounts[key] = cards.length;
+    return cards.map((c, i) => cardHtml(c, i >= prevLen, (i - prevLen) * 110)).join("");
+  }
+
+  // breaks a bet amount down into an actual little stack of chips instead of
+  // just printing the number, using the same denominations as the chip tray
+  function chipStackHtml(amount){
+    if(!amount) return '<span style="opacity:.5;">no bet</span>';
+    let rem = amount;
+    let html = '<span class="chip-stack">';
+    for(const d of [500,100,25,5]){
+      const n = Math.floor(rem/d);
+      rem -= n*d;
+      if(!n) continue;
+      const shown = Math.min(n, 3);
+      for(let i=0;i<shown;i++) html += `<span class="mini-chip c${d}"></span>`;
+      if(n>shown) html += `<span class="chip-count">&times;${n}</span>`;
+    }
+    html += `</span><span class="chip-count">${amount.toLocaleString()}</span>`;
+    return html;
+  }
+  function betLabelHtml(amount){
+    return amount ? `bet ${chipStackHtml(amount)}` : 'no bet';
+  }
+  function handTotalClient(cards){
+    let sum=0, aces=0;
+    for(const c of cards){ if(!c) continue;
+      sum += c.rank==="A"?11:(["J","Q","K"].includes(c.rank)?10:parseInt(c.rank,10));
+      if(c.rank==="A") aces++;
+    }
+    while(sum>21 && aces>0){ sum-=10; aces--; }
+    return sum;
+  }
+
+  function statusLabel(p, seat, round){
+    if(!seat) return round ? "Sitting out" : (p.ready ? "Ready" : "Betting");
+    if(round && round.phase==="resolved" && seat.result){
+      return {win:"Win", lose:"Lose", push:"Push", blackjack:"Blackjack!"}[seat.result];
+    }
+    return {playing:"Playing", stood:"Stand", bust:"Bust", blackjack:"Blackjack!"}[seat.status] || "";
+  }
+  function statusClass(p, seat, round){
+    if(!seat) return round ? "" : (p.ready ? "ready" : "betting");
+    if(round && round.phase==="resolved" && seat.result) return seat.result;
+    return seat.status;
+  }
+
+  function render(state){
+    const me = state.players.find(p=>p.id===myId);
+    const iAmDealer = state.dealerId === myId;
+    document.getElementById("whoami").innerHTML = iAmDealer
+      ? `<b>${escapeHtml(me.name)}</b> &middot; dealing`
+      : `<b>${escapeHtml(me.name)}</b> &middot; bank <b>${me.bankroll.toLocaleString()}</b>`;
+
+    const dealer = state.players.find(p=>p.id===state.dealerId);
+    document.getElementById("dealerLabel").textContent = dealer ? `${dealer.name} deals` : "House deals itself";
+
+    const r = state.round;
+    const roundId = r ? r.roundId : null;
+    if(roundId !== prevRoundId){
+      prevCounts = {};   // fresh deal (or table cleared) — every card on screen animates in
+      prevRoundId = roundId;
+    }
+
+    const dHand = r ? r.dealerHand : [];
+    document.getElementById("dealerHand").innerHTML = handHtml(dHand, "dealer") || '<span style="opacity:.4;font-family:\'Space Mono\',monospace;font-size:.8rem;">waiting for the deal</span>';
+    const dv = document.getElementById("dealerValue");
+    if(!r){
+      dv.innerHTML = "&nbsp;";
+    } else if(r.dealerHidden){
+      const up = r.dealerHand[0];
+      dv.innerHTML = `showing <span class="num">${up.rank==="A"?11:(["J","Q","K"].includes(up.rank)?10:up.rank)}</span>`;
+    } else {
+      const t = handTotalClient(r.dealerHand);
+      dv.innerHTML = `total <span class="num">${t}</span>${t>21?' &mdash; bust':''}`;
+    }
+
+    const note = document.getElementById("roundNote");
+    if(r && r.dealerBlackjackEarly && r.phase==="resolved"){
+      note.textContent = "Dealer had blackjack &mdash; naturals push, the rest lose the hand.";
+    } else if(r && r.phase==="dealer"){
+      note.textContent = "Dealer is playing out the hand&hellip;";
+    } else {
+      note.textContent = "";
+    }
+
+    // roster: everyone's status, visible to all
+    const roster = document.getElementById("roster");
+    roster.innerHTML = state.players.map(p=>{
+      const seat = r ? r.seats[p.id] : null;
+      const isTurn = r && r.phase==="player-turns" && r.order[r.turnIdx]===p.id;
+      const cards = seat ? seat.cards : [];
+      const cardsHtml = handHtml(cards, p.id);
+      const total = cards.length ? handTotalClient(cards) : null;
+      return `
+      <div class="seat ${isTurn?'active':''} ${p.isDealer?'is-dealer':''}">
+        <div class="seat-head">
+          <span class="nm">${escapeHtml(p.name)}${p.isDealer?' (dealer)':''}</span>
+          <span class="status-pill ${statusClass(p, seat, r)}">${p.isDealer ? 'Running house' : statusLabel(p, seat, r)}</span>
+        </div>
+        ${p.isDealer ? '' : `
+        <div class="hand">${cardsHtml}</div>
+        ${total!==null ? `<div class="hand-value">total <span class="num">${total}</span></div>` : ''}
+        <div class="seat-foot">
+          <span class="bet">${betLabelHtml(seat ? seat.bet : p.pendingBet)}</span>
+          <span>bank ${p.bankroll.toLocaleString()}</span>
+        </div>`}
+      </div>`;
+    }).join("");
+
+    renderMyPanel(state, me, iAmDealer);
+  }
+
+  function renderMyPanel(state, me, iAmDealer){
+    const panel = document.getElementById("myPanel");
+    const r = state.round;
+
+    if(iAmDealer){
+      const others = state.players.filter(p=>!p.isDealer);
+      let controls = "";
+      if(!r || r.phase==="resolved"){
+        const anyBet = !r && others.some(p=>(p.pendingBet||0) >= 10);
+        controls = r
+          ? `<button class="btn" onclick="dealerNextRound()">Next round</button>`
+          : `<button class="btn" onclick="dealerDeal()" ${anyBet?'':'disabled'}>Deal</button>`;
+      } else {
+        controls = `<p class="hint" style="margin:0;">Round in progress &mdash; ${r.order[r.turnIdx] ? escapeHtml((state.players.find(p=>p.id===r.order[r.turnIdx])||{}).name||'') + "'s move" : 'dealer is playing'}</p>`;
+      }
+      panel.innerHTML = `
+        <h3>Dealer console</h3>
+        <div class="dealer-console">
+          ${controls}
+          ${others.map(p=>`
+            <div class="dc-row">
+              <div>
+                <div class="who">${escapeHtml(p.name)}</div>
+                <div class="bank">${p.bankroll.toLocaleString()}</div>
+              </div>
+              <div class="adj-group">
+                <button class="adj-btn minus" onclick="dealerAdjust('${p.id}',-100)">-100</button>
+                <button class="adj-btn minus" onclick="dealerAdjust('${p.id}',-25)">-25</button>
+                <button class="adj-btn plus" onclick="dealerAdjust('${p.id}',25)">+25</button>
+                <button class="adj-btn plus" onclick="dealerAdjust('${p.id}',100)">+100</button>
+                <button class="adj-btn kick" onclick="dealerKick('${p.id}','${escapeHtml(p.name).replace(/'/g,"\\'")}')" title="Remove from the table">Kick</button>
+              </div>
+            </div>`).join("") || '<p class="hint" style="margin:0;">Waiting for players to join&hellip;</p>'}
+        </div>`;
+      return;
+    }
+
+    // I'm a regular player
+    if(!r || r.phase==="resolved"){
+      const bet = me.pendingBet || 0;
+      const noDealer = !state.dealerId;
+      const canReady = bet >= 10;
+      const readyBtn = me.ready
+        ? `<button class="btn ghost" onclick="toggleReady()">Not ready after all</button>`
+        : `<button class="btn" onclick="toggleReady()" ${canReady?'':'disabled'}>Ready</button>`;
+      const others = state.players.filter(p=>!p.isDealer && p.id!==me.id);
+      const waitingOn = others.filter(p=>(p.pendingBet||0)>=10 && !p.ready).map(p=>p.name);
+      let statusLine;
+      if(me.ready && waitingOn.length){
+        statusLine = `Waiting on ${escapeHtml(waitingOn.join(', '))}&hellip;`;
+      } else if(me.ready){
+        statusLine = "Everyone's ready &mdash; dealing now.";
+      } else if(noDealer){
+        statusLine = "No one's dealing here &mdash; the house deals itself once everyone with a bet down hits Ready.";
+      } else {
+        statusLine = "Place a bet, then hit Ready.";
+      }
+      panel.innerHTML = `
+        <h3>Your bet</h3>
+        <div class="chip-btns">
+          <div class="chip c5" onclick="placeBet(5)">5</div>
+          <div class="chip c25" onclick="placeBet(25)">25</div>
+          <div class="chip c100" onclick="placeBet(100)">100</div>
+          <div class="chip c500" onclick="placeBet(500)">500</div>
+        </div>
+        <div class="bet-line">on the table: ${chipStackHtml(bet)} ${bet>0?'<button onclick="clearBet()">clear</button>':''}</div>
+        <div class="action-row">
+          ${readyBtn}
+          ${(r && noDealer) ? `<button class="btn ghost" onclick="dealerNextRound()">Next round</button>` : ''}
+        </div>
+        <p class="hint" style="margin:10px 0 0;">${statusLine}</p>`;
+      return;
+    }
+
+    const seat = r.seats[me.id];
+    if(!seat){
+      const canAdvance = !state.dealerId && r.phase==="resolved";
+      panel.innerHTML = `<p class="hint" style="margin:0 0 10px;">Sitting out this round.</p>${canAdvance ? `<button class="btn ghost" onclick="dealerNextRound()">Next round</button>` : ''}`;
+      return;
+    }
+    const isMyTurn = r.phase==="player-turns" && r.order[r.turnIdx]===me.id;
+    if(!isMyTurn){
+      const turnName = r.phase==="player-turns" ? (state.players.find(p=>p.id===r.order[r.turnIdx])||{}).name : (dealerNameOf(state));
+      panel.innerHTML = `<h3>Your hand</h3><p class="hint" style="margin:0;">Waiting on ${escapeHtml(turnName||'')}&hellip;</p>`;
+      return;
+    }
+    const canDouble = seat.cards.length===2 && me.bankroll>=seat.bet;
+    panel.innerHTML = `
+      <h3>Your move</h3>
+      <div class="action-row">
+        <button class="btn" onclick="doAction('hit')">Hit</button>
+        <button class="btn ghost" onclick="doAction('stand')">Stand</button>
+        <button class="btn ghost" onclick="doAction('double')" ${canDouble?'':'disabled'}>Double</button>
+      </div>`;
+  }
+  function dealerNameOf(state){
+    const d = state.players.find(p=>p.id===state.dealerId);
+    return d ? d.name+" is dealing" : "the house";
+  }
+
+  window.placeBet = async (amt)=>{ await api("/api/bet", {id:myId, amount:amt}); poll(); };
+  window.clearBet = async ()=>{ await api("/api/clear_bet", {id:myId}); poll(); };
+  window.toggleReady = async ()=>{ await api("/api/ready", {id:myId}); poll(); };
+  window.doAction = async (action)=>{ await api("/api/action", {id:myId, action}); poll(); };
+  window.dealerDeal = async ()=>{ await api("/api/deal", {id:myId}); poll(); };
+  window.dealerNextRound = async ()=>{ await api("/api/next_round", {id:myId}); poll(); };
+  window.dealerAdjust = async (target, delta)=>{ await api("/api/adjust", {id:myId, target, delta}); poll(); };
+  window.dealerKick = async (target, name)=>{
+    if(!confirm(`Kick ${name} from the table?`)) return;
+    await api("/api/kick", {id:myId, target});
+    poll();
+  };
+
+  document.getElementById("nameInput").addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ e.preventDefault(); joinAs("player"); }
+  });
+
+  // ---- boot ----
+  if(myId){
+    document.getElementById("nameInput").value = myName;
+    api("/api/state?id="+encodeURIComponent(myId)).then(state=>{
+      if(state.players && state.players.find(p=>p.id===myId)){
+        enterTable();
+      } else {
+        localStorage.removeItem("fb_id");
+        myId = null;
+        show("join");
+        refreshJoinScreen();
+      }
+    });
+  } else {
+    document.getElementById("nameInput").value = myName;
+    show("join");
+    refreshJoinScreen();
+    setInterval(()=>{ if(!myId) refreshJoinScreen(); }, 2500);
+  }
+})();
+</script>
+</body>
+</html>
