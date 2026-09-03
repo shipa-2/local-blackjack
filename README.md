@@ -8,6 +8,8 @@ in real time.
 No build step, no dependencies, no accounts — just Python's standard
 library on the host and a browser on every device.
 
+![A player's turn at the table](docs/screenshot.png)
+
 ## Running it
 
 On the host machine:
